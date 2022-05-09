@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="SFTPConnect:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/SFTPConnect_jar</output-path>
+    <root id="archive" name="SFTPConnect.jar">
+      <element id="module-output" name="SFTPConnect" />
+    </root>
+  </artifact>
+</component>

@@ -1,12 +1,18 @@
 package com.example.helloworld;
 
+import com.example.csv.CSVUtils;
 import com.jcraft.jsch.*;
+import com.opencsv.exceptions.CsvException;
+
+import java.io.IOException;
 
 public class HelloWorld {
-    public static void main(String[] args) throws JSchException, SftpException {
+    public static void main(String[] args) throws JSchException, SftpException, IOException, CsvException {
         System.out.println("Hello world args4");
+
+        CSVUtils.addCustomers(2);
         HelloWorld obj = new HelloWorld();
-        obj.setupJsch();
+        //obj.setupJsch();
     }
 
     private ChannelSftp setupJsch() throws JSchException, SftpException {

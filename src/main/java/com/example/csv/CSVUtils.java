@@ -5,15 +5,15 @@ import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 
 public class CSVUtils {
 
-    public static boolean addCustomers(int num) throws IOException, CsvException {
+    public static boolean addCustomers(int num) throws IOException, CsvException, URISyntaxException {
 
-        //InputStream inputStream = CSVUtils.class.getClassLoader().getResourceAsStream("CNOF_EPS_CDH_CONTACT_Rohit_5_1_1.csv");
-
-        File file = new File(CSVUtils.class.getClassLoader().getResource("CNOF_EPS_CDH_CONTACT_Rohit_5_1_1.csv").getPath());
+        File file = new File("CNOF_EPS_CDH_CONTACT_Rohit_5_1_1.csv");
 
         CSVReader reader = new CSVReader(new FileReader(file));
         List<String[]> csvBody = reader.readAll();
@@ -26,7 +26,8 @@ public class CSVUtils {
 
         reader.close();
 
-        File outputFile = new File("src/main/resources/CNOF_EPS_CDH_CONTACT_Rohit_5_1_1.csv");
+        File outputFile = new File("CNOF_EPS_CDH_CONTACT_Rohit_5_1_1.csv");
+
         String desktopPath = System.getProperty("user.home") + "/Desktop";
         File outputFileDesktop = new File(desktopPath + "/CNOF_EPS_CDH_CONTACT_Rohit_5_1_1.csv");
 

@@ -5,9 +5,10 @@ import com.jcraft.jsch.*;
 import com.opencsv.exceptions.CsvException;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 public class HelloWorld {
-    public static void main(String[] args) throws JSchException, SftpException, IOException, CsvException {
+    public static void main(String[] args) throws JSchException, SftpException, IOException, CsvException, URISyntaxException {
         System.out.println("Hello world args4");
 
         CSVUtils.addCustomers(2);

@@ -33,7 +33,7 @@ public class SFTPConnect {
 
             System.out.println("Uploading policy file...");
             channel.put(DESKTOP_PATH + POLICY_FILE_NAME, "/home/files/Rohit/",0 );
-            
+
             channel.disconnect();
             session.disconnect();
         } catch (JSchException e) {

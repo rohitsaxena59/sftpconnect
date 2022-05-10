@@ -13,7 +13,7 @@ public class HelloWorld {
         System.out.println("Starting hello world");
 
         String[] customers = CSVUtils.addCustomers();
-        System.out.println("Customers generated: " + customers[0]+"," + customers[1]);
+        System.out.println("Customers generated: " + customers[0] + "," + customers[1]);
 
         String[] policies = CSVUtils.addPolicy(customers);
         System.out.println("Policy generated for above customer: " + policies[0]);
@@ -21,5 +21,4 @@ public class HelloWorld {
         SFTPConnect obj = new SFTPConnect();
         obj.setupJsch();
     }
-
 }

@@ -4,7 +4,10 @@ Application to connect to SFTP server to upload files.
 
 ## Installation
 
-TODO: Describe the installation process
+Install Java version: openjdk-17
+Install maven version 4.0.0
+
+Checkout the repo
 
 ## Usage
 

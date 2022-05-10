@@ -4,10 +4,14 @@ import com.jcraft.jsch.*;
 
 public class SFTPConnect {
 
+    private static final String DESKTOP_PATH = System.getProperty("user.home") + "/Desktop/";
+    public static final String CUST_FILE_NAME = "CNOF_EPS_CDH_CONTACT_Rohit_5_1_1.csv";
+    public static final String POLICY_FILE_NAME = "CNOF_EPS_CDH_POLICY_Rohit_5_1_1.csv";
+
     public ChannelSftp setupJsch() throws JSchException, SftpException {
         JSch jsch = new JSch();
         Session session = null;
-        String privateKeyPath = "/Users/rohitsaxena/Desktop/id_rsa";
+        String privateKeyPath = DESKTOP_PATH + "id_rsa";
         try {
             jsch.addIdentity(privateKeyPath);
             session = jsch.getSession("fpai4", "35.245.98.89", 22);
@@ -23,9 +27,13 @@ public class SFTPConnect {
             session.connect();
             ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
             channel.connect();
-            System.out.println("Downloading file...");
-            channel.get("/home/files/Rohit/CNOF_EPS_CDH_CONTACT_Rohit_5_1_1.csv", "/Users/rohitsaxena/Desktop/");
 
+            System.out.println("Uploading customer file...");
+            channel.put(DESKTOP_PATH + CUST_FILE_NAME, "/home/files/Rohit/",0 );
+
+            System.out.println("Uploading policy file...");
+            channel.put(DESKTOP_PATH + POLICY_FILE_NAME, "/home/files/Rohit/",0 );
+            
             channel.disconnect();
             session.disconnect();
         } catch (JSchException e) {

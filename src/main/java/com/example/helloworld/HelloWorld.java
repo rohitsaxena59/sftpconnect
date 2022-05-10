@@ -1,6 +1,7 @@
 package com.example.helloworld;
 
 import com.example.csv.CSVUtils;
+import com.example.sftp.SFTPConnect;
 import com.jcraft.jsch.*;
 import com.opencsv.exceptions.CsvException;
 
@@ -9,40 +10,16 @@ import java.net.URISyntaxException;
 
 public class HelloWorld {
     public static void main(String[] args) throws JSchException, SftpException, IOException, CsvException, URISyntaxException {
-        System.out.println("Hello world args4");
+        System.out.println("Starting hello world");
 
-        CSVUtils.addCustomers(2);
-        HelloWorld obj = new HelloWorld();
-        //obj.setupJsch();
+        String[] customers = CSVUtils.addCustomers();
+        System.out.println("Customers generated: " + customers[0]+"," + customers[1]);
+
+        String[] policies = CSVUtils.addPolicy(customers);
+        System.out.println("Policy generated for above customer: " + policies[0]);
+
+        SFTPConnect obj = new SFTPConnect();
+        obj.setupJsch();
     }
 
-    private ChannelSftp setupJsch() throws JSchException, SftpException {
-        JSch jsch = new JSch();
-        Session session = null;
-        String privateKeyPath = "/Users/rohitsaxena/Desktop/id_rsa";
-        try {
-            jsch.addIdentity(privateKeyPath);
-            session = jsch.getSession("fpai4", "35.245.98.89", 22);
-            session.setConfig("PreferredAuthentications", "publickey,gssapi-keyex,gssapi-with-mic");
-            java.util.Properties config = new java.util.Properties();
-            config.put("StrictHostKeyChecking", "no");
-            session.setConfig(config);
-        } catch (JSchException e) {
-            throw new RuntimeException("Failed to create Jsch Session object.", e);
-        }
-
-        try {
-            session.connect();
-            ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
-            channel.connect();
-            System.out.println("Downloading file...");
-            channel.get("/home/files/Rohit/CNOF_EPS_CDH_CONTACT_Rohit_5_1_1.csv", "/Users/rohitsaxena/Desktop/");
-
-            channel.disconnect();
-            session.disconnect();
-        } catch (JSchException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 }

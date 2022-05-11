@@ -21,8 +21,13 @@ public class CSVUtils {
     public static final String PROD_TYPE = "GBL";
     public static String[] addCustomers(String[] args) throws IOException, CsvException {
 
-        File file = new File(CUST_FILE_NAME);
+        String desktopPath = System.getProperty("user.home") + "/Desktop/";
 
+        // Read from resources folder
+        //InputStream inputStream = CSVUtils.class.getClassLoader().getResourceAsStream(CUST_FILE_NAME);
+        //CSVReader reader = new CSVReader(new InputStreamReader(inputStream));
+
+        File file = new File(desktopPath + CUST_FILE_NAME);
         CSVReader reader = new CSVReader(new FileReader(file));
 
         String[] headers = reader.peek();
@@ -44,13 +49,10 @@ public class CSVUtils {
         csvBody.get(1)[cureEmailIndIdx] = args[3];
         csvBody.get(2)[cureEmailIndIdx] = args[3];
 
-        csvBody.get(1)[emailAddressIdx] = "raghugoud@futureproofai.com";
-
         reader.close();
 
         File outputFile = new File(CUST_FILE_NAME);
 
-        String desktopPath = System.getProperty("user.home") + "/Desktop/";
         File outputFileDesktop = new File(desktopPath + CUST_FILE_NAME);
         File outputFileVars = new File(desktopPath + CUST_FILE_VARS+args[0]+args[1]+args[2]+args[3]+".csv");
 
@@ -70,9 +72,13 @@ public class CSVUtils {
 
     public static String[] addPolicy(String[] customers, String[] args) throws IOException, CsvException {
 
-        File file = new File(POLICY_FILE_NAME);
+        String desktopPath = System.getProperty("user.home") + "/Desktop/";
 
+        File file = new File(desktopPath + POLICY_FILE_NAME);
         CSVReader reader = new CSVReader(new FileReader(file));
+
+        //InputStream inputStream = CSVUtils.class.getClassLoader().getResourceAsStream(POLICY_FILE_NAME);
+        //CSVReader reader = new CSVReader(new InputStreamReader(inputStream));
 
         String[] headers = reader.peek();
         int activationDateIdx =  Arrays.asList(headers).indexOf("POLCY_ACTVT_DT");
@@ -123,7 +129,7 @@ public class CSVUtils {
 
         File outputFile = new File(POLICY_FILE_NAME);
 
-        String desktopPath = System.getProperty("user.home") + "/Desktop/";
+
         File outputFileDesktop = new File(desktopPath + POLICY_FILE_NAME);
         File outputFileVars = new File(desktopPath + POLICY_FILE_VARS+args[0]+args[1]+args[2]+args[3]+".csv");
 

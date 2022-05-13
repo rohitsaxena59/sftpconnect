@@ -12,16 +12,16 @@ import java.util.Arrays;
 import java.util.List;
 
 public class CSVUtils {
-    public static final String CUST_FILE_NAME = "CNOF_EPS_CDH_CONTACT_Rohit_5_1_1.csv";
-    public static final String POLICY_FILE_NAME = "CNOF_EPS_CDH_POLICY_Rohit_5_1_1.csv";
+    public static String CUST_FILE_NAME = "CNOF_EPS_CDH_CONTACT_NAME_5_1_1.csv";
+    public static String POLICY_FILE_NAME = "CNOF_EPS_CDH_POLICY_NAME_5_1_1.csv";
 
-    public static final String CUST_FILE_VARS = "CNOF_EPS_CDH_CONTACT_Rohit_";
-    public static final String POLICY_FILE_VARS = "CNOF_EPS_CDH_POLICY_Rohit_";
-
-    public static final String PROD_TYPE = "GBL";
+    public static String CUST_FILE_VARS = "CNOF_EPS_CDH_CONTACT_NAME_";
+    public static String POLICY_FILE_VARS = "CNOF_EPS_CDH_POLICY_NAME_";
     public static String[] addCustomers(String[] args) throws IOException, CsvException {
 
         String desktopPath = System.getProperty("user.home") + "/Desktop/";
+        CUST_FILE_NAME = CUST_FILE_NAME.replace("NAME",args[4]);
+        CUST_FILE_VARS = CUST_FILE_VARS.replace("NAME",args[4]);
 
         // Read from resources folder
         //InputStream inputStream = CSVUtils.class.getClassLoader().getResourceAsStream(CUST_FILE_NAME);
@@ -43,11 +43,14 @@ public class CSVUtils {
         csvBody.get(1)[0] = Long.toString(startCustId);
         csvBody.get(2)[0] = Long.toString(startCustId+1);
 
-        csvBody.get(1)[doNotEmailIndIdx] = args[2];
-        csvBody.get(2)[doNotEmailIndIdx] = args[2];
+        csvBody.get(1)[cureEmailIndIdx] = args[2];
+        csvBody.get(2)[cureEmailIndIdx] = args[2];
 
-        csvBody.get(1)[cureEmailIndIdx] = args[3];
-        csvBody.get(2)[cureEmailIndIdx] = args[3];
+        csvBody.get(1)[doNotEmailIndIdx] = args[3];
+        csvBody.get(2)[doNotEmailIndIdx] = args[3];
+
+        csvBody.get(1)[emailAddressIdx] = "raghugoud@futureproofai.com";
+        csvBody.get(2)[emailAddressIdx] = "raghugoud@futureproofai.com";
 
         reader.close();
 
@@ -68,11 +71,14 @@ public class CSVUtils {
         writer.writeAll(csvBody);
         writer.flush();
         writer.close();
+        System.out.println("Generated file: " + file.getAbsolutePath());
     }
 
     public static String[] addPolicy(String[] customers, String[] args) throws IOException, CsvException {
 
         String desktopPath = System.getProperty("user.home") + "/Desktop/";
+        POLICY_FILE_NAME = POLICY_FILE_NAME.replace("NAME",args[4]);
+        POLICY_FILE_VARS = POLICY_FILE_VARS.replace("NAME",args[4]);
 
         File file = new File(desktopPath + POLICY_FILE_NAME);
         CSVReader reader = new CSVReader(new FileReader(file));
@@ -104,7 +110,7 @@ public class CSVUtils {
         if(Integer.parseInt(args[0]) < 0) {
             date = LocalDate.now().minus(Math.abs(Integer.parseInt(args[0])), ChronoUnit.DAYS);
         } else if(Integer.parseInt(args[0]) > 0) {
-            date = LocalDate.now().plus(1, ChronoUnit.DAYS);
+            date = LocalDate.now().plus(Math.abs(Integer.parseInt(args[0])), ChronoUnit.DAYS);
         } else {
             date = LocalDate.now();
         }

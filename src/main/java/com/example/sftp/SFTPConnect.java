@@ -5,10 +5,13 @@ import com.jcraft.jsch.*;
 public class SFTPConnect {
 
     private static final String DESKTOP_PATH = System.getProperty("user.home") + "/Desktop/";
-    public static final String CUST_FILE_NAME = "CNOF_EPS_CDH_CONTACT_Rohit_5_1_1.csv";
-    public static final String POLICY_FILE_NAME = "CNOF_EPS_CDH_POLICY_Rohit_5_1_1.csv";
+    public static String CUST_FILE_NAME = "CNOF_EPS_CDH_CONTACT_NAME_5_1_1.csv";
+    public static String POLICY_FILE_NAME = "CNOF_EPS_CDH_POLICY_NAME_5_1_1.csv";
 
-    public ChannelSftp setupJsch() throws JSchException, SftpException {
+    public ChannelSftp setupJsch(String[] args) throws JSchException, SftpException {
+        CUST_FILE_NAME = CUST_FILE_NAME.replace("NAME",args[4]);
+        POLICY_FILE_NAME = POLICY_FILE_NAME.replace("NAME",args[4]);
+
         JSch jsch = new JSch();
         Session session = null;
         String privateKeyPath = DESKTOP_PATH + "id_rsa";
@@ -29,10 +32,10 @@ public class SFTPConnect {
             channel.connect();
 
             System.out.println("Uploading customer file...");
-            channel.put(DESKTOP_PATH + CUST_FILE_NAME, "/home/files/Rohit/",0 );
+            channel.put(DESKTOP_PATH + CUST_FILE_NAME, "/home/files/" + args[4] +"/",0 );
 
             System.out.println("Uploading policy file...");
-            channel.put(DESKTOP_PATH + POLICY_FILE_NAME, "/home/files/Rohit/",0 );
+            channel.put(DESKTOP_PATH + POLICY_FILE_NAME, "/home/files/" + args[4] +"/",0 );
 
             channel.disconnect();
             session.disconnect();

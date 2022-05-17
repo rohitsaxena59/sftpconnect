@@ -1,10 +1,12 @@
 package com.example.csv;
 
-import com.opencsv.CSVReader;
-import com.opencsv.CSVWriter;
+import com.opencsv.*;
 import com.opencsv.exceptions.CsvException;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -12,23 +14,25 @@ import java.util.Arrays;
 import java.util.List;
 
 public class CSVUtils {
-    public static String CUST_FILE_NAME = "CNOF_EPS_CDH_CONTACT_NAME_5_1_1.csv";
-    public static String POLICY_FILE_NAME = "CNOF_EPS_CDH_POLICY_NAME_5_1_1.csv";
+    public static String CUST_FILE_NAME = "CNOF_EPS_CDH_CONTACT_pipe_test.csv";
+    public static String POLICY_FILE_NAME = "CNOF_EPS_CDH_POLICY_pipe_test.csv";
 
     public static String CUST_FILE_VARS = "CNOF_EPS_CDH_CONTACT_NAME_";
     public static String POLICY_FILE_VARS = "CNOF_EPS_CDH_POLICY_NAME_";
-    public static String[] addCustomers(String[] args) throws IOException, CsvException {
+    public static String[] addCustomers(String[] args, Long[] params) throws IOException, CsvException {
 
         String desktopPath = System.getProperty("user.home") + "/Desktop/";
         CUST_FILE_NAME = CUST_FILE_NAME.replace("NAME",args[4]);
         CUST_FILE_VARS = CUST_FILE_VARS.replace("NAME",args[4]);
 
-        // Read from resources folder
-        //InputStream inputStream = CSVUtils.class.getClassLoader().getResourceAsStream(CUST_FILE_NAME);
-        //CSVReader reader = new CSVReader(new InputStreamReader(inputStream));
+        //Read from resources folder
+        InputStream inputStream = CSVUtils.class.getClassLoader().getResourceAsStream(CUST_FILE_NAME);
+        CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
+        CSVReader reader = new CSVReaderBuilder(new InputStreamReader(inputStream)).withCSVParser(parser).build();
 
-        File file = new File(desktopPath + CUST_FILE_NAME);
-        CSVReader reader = new CSVReader(new FileReader(file));
+//        File file = new File(desktopPath + CUST_FILE_NAME);
+//        CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
+//        CSVReader reader = new CSVReaderBuilder(new FileReader(file)).withCSVParser(parser).build();
 
         String[] headers = reader.peek();
         int doNotEmailIndIdx =  Arrays.asList(headers).indexOf("DO_NOT_EMAIL_IND");
@@ -37,11 +41,8 @@ public class CSVUtils {
 
         List<String[]> csvBody = reader.readAll();
 
-        Long lastCustId = Long.parseLong(csvBody.get(csvBody.size()-1)[0]);
-        Long startCustId = lastCustId+1;
-
-        csvBody.get(1)[0] = Long.toString(startCustId);
-        csvBody.get(2)[0] = Long.toString(startCustId+1);
+        csvBody.get(1)[0] = Long.toString(++params[0]);
+        csvBody.get(2)[0] = Long.toString(++params[0]);
 
         csvBody.get(1)[cureEmailIndIdx] = args[2];
         csvBody.get(2)[cureEmailIndIdx] = args[2];
@@ -58,33 +59,46 @@ public class CSVUtils {
 
         File outputFileDesktop = new File(desktopPath + CUST_FILE_NAME);
         File outputFileVars = new File(desktopPath + CUST_FILE_VARS+args[0]+args[1]+args[2]+args[3]+".csv");
+        File customerTxtFile = new File(desktopPath + "customer.txt");
 
         //writeToFile(csvBody, outputFile);
         writeToFile(csvBody, outputFileDesktop);
         writeToFile(csvBody, outputFileVars);
+        writeToFile(Long.toString(params[0]), customerTxtFile);
 
         return new String[] {csvBody.get(1)[0], csvBody.get(2)[0]};
     }
 
+    private static void writeToFile(String text, File file) throws IOException {
+        FileWriter fileWriter = new FileWriter(file, false);
+        fileWriter.write(text);
+        fileWriter.close();
+    }
+
     private static void writeToFile(List<String[]> csvBody, File file) throws IOException {
-        CSVWriter writer = new CSVWriter(new FileWriter(file));
+        //CSVWriter writer = new CSVWriter(new FileWriter(file));
+        CSVWriter writer = (CSVWriter) new CSVWriterBuilder(new FileWriter(file)).withSeparator('|')
+                                .withQuoteChar(CSVWriter.NO_QUOTE_CHARACTER).build();
+
         writer.writeAll(csvBody);
         writer.flush();
         writer.close();
         System.out.println("Generated file: " + file.getAbsolutePath());
     }
 
-    public static String[] addPolicy(String[] customers, String[] args) throws IOException, CsvException {
+    public static String[] addPolicy(String[] customers, String[] args, Long[] params) throws IOException, CsvException {
 
         String desktopPath = System.getProperty("user.home") + "/Desktop/";
         POLICY_FILE_NAME = POLICY_FILE_NAME.replace("NAME",args[4]);
         POLICY_FILE_VARS = POLICY_FILE_VARS.replace("NAME",args[4]);
 
-        File file = new File(desktopPath + POLICY_FILE_NAME);
-        CSVReader reader = new CSVReader(new FileReader(file));
+        //File file = new File(desktopPath + POLICY_FILE_NAME);
+        //CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
+        //CSVReader reader = new CSVReaderBuilder(new FileReader(file)).withCSVParser(parser).build();
 
-        //InputStream inputStream = CSVUtils.class.getClassLoader().getResourceAsStream(POLICY_FILE_NAME);
-        //CSVReader reader = new CSVReader(new InputStreamReader(inputStream));
+        InputStream inputStream = CSVUtils.class.getClassLoader().getResourceAsStream(POLICY_FILE_NAME);
+        CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
+        CSVReader reader = new CSVReaderBuilder(new InputStreamReader(inputStream)).withCSVParser(parser).build();
 
         String[] headers = reader.peek();
         int activationDateIdx =  Arrays.asList(headers).indexOf("POLCY_ACTVT_DT");
@@ -98,8 +112,7 @@ public class CSVUtils {
         csvBody.get(3)[0] = customers[0];
         csvBody.get(4)[0] = customers[1];
 
-        Long lastPolicyId = Long.parseLong(csvBody.get(csvBody.size()-1)[1]);
-        Long startPolicyId = lastPolicyId + 1;
+        Long startPolicyId = ++params[1];
 
         csvBody.get(1)[1] = Long.toString(startPolicyId);
         csvBody.get(2)[1] = Long.toString(startPolicyId);
@@ -135,13 +148,14 @@ public class CSVUtils {
 
         File outputFile = new File(POLICY_FILE_NAME);
 
-
         File outputFileDesktop = new File(desktopPath + POLICY_FILE_NAME);
         File outputFileVars = new File(desktopPath + POLICY_FILE_VARS+args[0]+args[1]+args[2]+args[3]+".csv");
+        File policyTxtFile = new File(desktopPath + "policy.txt");
 
         //writeToFile(csvBody, outputFile);
         writeToFile(csvBody, outputFileDesktop);
         writeToFile(csvBody, outputFileVars);
+        writeToFile(Long.toString(params[1]), policyTxtFile);
 
         return new String[] {csvBody.get(1)[1]};
     }

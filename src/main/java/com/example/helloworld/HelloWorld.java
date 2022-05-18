@@ -10,8 +10,8 @@ import java.io.IOException;
 public class HelloWorld {
     public static void main(String[] args) throws JSchException, SftpException, IOException, CsvException {
 
-        // args - ActivationDate, ProductType, CureEmailInd ,DoNotEmail, name
-        if(args.length != 5) {
+        // args - ActivationDate, ProductType, CureEmailInd ,DoNotEmail, name, sentDate
+        if(args.length != 6) {
             throw new CsvException("Please enter all arguments");
         }
 
@@ -24,6 +24,7 @@ public class HelloWorld {
 
         String[] customers = CSVUtils.addCustomers(args, params);
         String[] policies = CSVUtils.addPolicy(customers, args, params);
+        CSVUtils.addEmailSent(customers, args);
 
         System.out.println("Customers generated: " + customers[0] + "," + customers[1]);
         System.out.println("Policy generated for above customer: " + policies[0]);

@@ -30,8 +30,6 @@ public class SFTPConnect {
     }
 
     public void uploadFiles(String[] args) throws JSchException, SftpException {
-        CUST_FILE_NAME = CUST_FILE_NAME.replace("NAME",args[4]);
-        POLICY_FILE_NAME = POLICY_FILE_NAME.replace("NAME",args[4]);
 
         ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
         channel.connect();
@@ -49,10 +47,6 @@ public class SFTPConnect {
         channel.put(DESKTOP_PATH+"policy.txt", "/home/files/QA/generated/policy.txt");
 
         channel.disconnect();
-    }
-
-    public void getSampleFiles() throws JSchException {
-        // Read from local for now
     }
 
     public Long[] getParams() throws JSchException, SftpException, FileNotFoundException {

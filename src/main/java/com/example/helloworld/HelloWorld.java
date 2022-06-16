@@ -10,8 +10,9 @@ import java.io.IOException;
 public class HelloWorld {
     public static void main(String[] args) throws JSchException, SftpException, IOException, CsvException {
 
-        // args - ActivationDate, ProductType, CureEmailInd ,DoNotEmail, name, sentDate
-        if(args.length != 6) {
+        // args - ActivationDate, ProductType, CureEmailInd ,DoNotEmail, name, sentDate,
+        // active/inactive policy, email id flag
+        if(args.length != 8) {
             throw new CsvException("Please enter all arguments");
         }
 

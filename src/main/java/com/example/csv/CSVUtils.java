@@ -2,12 +2,10 @@ package com.example.csv;
 
 import com.opencsv.*;
 import com.opencsv.exceptions.CsvException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
-import java.time.LocalDate;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -31,10 +29,6 @@ public class CSVUtils {
         CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
         CSVReader reader = new CSVReaderBuilder(new InputStreamReader(inputStream)).withCSVParser(parser).build();
 
-//        File file = new File(desktopPath + CUST_FILE_NAME);
-//        CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
-//        CSVReader reader = new CSVReaderBuilder(new FileReader(file)).withCSVParser(parser).build();
-
         String[] headers = reader.peek();
         int doNotEmailIndIdx =  Arrays.asList(headers).indexOf("DO_NOT_EMAIL_IND");
         int cureEmailIndIdx =  Arrays.asList(headers).indexOf("CURE_EMAIL_IND");
@@ -51,8 +45,8 @@ public class CSVUtils {
         csvBody.get(1)[doNotEmailIndIdx] = args[3];
         csvBody.get(2)[doNotEmailIndIdx] = args[3];
 
-        csvBody.get(1)[emailAddressIdx] = "raghugoud@futureproofai.com";
-        csvBody.get(2)[emailAddressIdx] = "raghugoud@futureproofai.com";
+        csvBody.get(1)[emailAddressIdx] = "N".equalsIgnoreCase(args[7]) ? StringUtils.EMPTY : "raghugoud@futureproofai.com";
+        csvBody.get(2)[emailAddressIdx] = "N".equalsIgnoreCase(args[7]) ? StringUtils.EMPTY : "raghugoud@futureproofai.com";
 
         reader.close();
 
@@ -104,6 +98,7 @@ public class CSVUtils {
         int activationDateIdx =  Arrays.asList(headers).indexOf("POLCY_ACTVT_DT");
         int baseProdTypeIdx =  Arrays.asList(headers).indexOf("BASE_PROD_TYPE_CD");
         int prodTypeIdx =  Arrays.asList(headers).indexOf("PROD_TYPE_CD");
+        int policyStatusIdx =  Arrays.asList(headers).indexOf("POLICY_STATUS_CD");
 
         List<String[]> csvBody = reader.readAll();
 
@@ -134,6 +129,11 @@ public class CSVUtils {
         csvBody.get(3)[prodTypeIdx] = args[1];
         csvBody.get(4)[prodTypeIdx] = args[1];
 
+        csvBody.get(1)[policyStatusIdx] = args[6];
+        csvBody.get(2)[policyStatusIdx] = args[6];
+        csvBody.get(3)[policyStatusIdx] = args[6];
+        csvBody.get(4)[policyStatusIdx] = args[6];
+
         reader.close();
 
         File outputFileDesktop = new File(DESKTOP_PATH + POLICY_FILE_NAME);
@@ -155,8 +155,15 @@ public class CSVUtils {
 
         csvBody.get(1)[1] = customers[0];
 
-        LocalDate date = getDate(args[5]);
+        ZonedDateTime utcTime = ZonedDateTime.now(ZoneOffset.UTC);
+        LocalDate date;
+        if(utcTime.toLocalDateTime().toLocalTime().getHour() >= 7) {
+            date = getDate(args[5]);
+        } else {
+            date = getDate(args[5]+1);
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd 07:00:00");
+
         csvBody.get(1)[4] = formatter.format(date);
 
         reader.close();

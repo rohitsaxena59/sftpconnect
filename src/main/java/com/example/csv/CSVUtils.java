@@ -86,10 +86,6 @@ public class CSVUtils {
         POLICY_FILE_NAME = POLICY_FILE_NAME.replace("NAME",args[4]);
         POLICY_FILE_VARS = POLICY_FILE_VARS.replace("NAME",args[4]);
 
-        //File file = new File(desktopPath + POLICY_FILE_NAME);
-        //CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
-        //CSVReader reader = new CSVReaderBuilder(new FileReader(file)).withCSVParser(parser).build();
-
         InputStream inputStream = CSVUtils.class.getClassLoader().getResourceAsStream(POLICY_FILE_NAME);
         CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
         CSVReader reader = new CSVReaderBuilder(new InputStreamReader(inputStream)).withCSVParser(parser).build();

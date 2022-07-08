@@ -1,5 +1,6 @@
 package com.example.csv;
 
+import com.example.process.ProcessUtils;
 import com.opencsv.*;
 import com.opencsv.exceptions.CsvException;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +15,7 @@ import java.util.List;
 public class CSVUtils {
     public static String CUST_FILE_NAME = "CNOF_EPS_CDH_CONTACT_pipe_test.csv";
     public static String POLICY_FILE_NAME = "CNOF_EPS_CDH_POLICY_pipe_test.csv";
-    public static String EMAIL_SENT_FILE = "Email_Sent_Stg_Test.csv";
+    public static String EMAIL_ACTIVITY_FILE = "Email_Activity_1.csv";
     public static String DESKTOP_PATH = System.getProperty("user.home") + "/Desktop/";
 
     public static String CUST_FILE_VARS = "CNOF_EPS_CDH_CONTACT_NAME_";
@@ -144,33 +145,35 @@ public class CSVUtils {
     }
 
     public static void addEmailSent(String[] customers, String[] args) throws IOException, CsvException {
-        InputStream inputStream = CSVUtils.class.getClassLoader().getResourceAsStream(EMAIL_SENT_FILE);
+        InputStream inputStream = CSVUtils.class.getClassLoader().getResourceAsStream(EMAIL_ACTIVITY_FILE);
         CSVReader reader = new CSVReader(new InputStreamReader(inputStream));
+
+        String[] headers = reader.peek();
+        int deploymentDate =  Arrays.asList(headers).indexOf("DeploymentDate_M");
+        int customerKey =  Arrays.asList(headers).indexOf("CustomerKey");
+        int status =  Arrays.asList(headers).indexOf("Action");
+        int actionTimestamp =  Arrays.asList(headers).indexOf("OriginalActionTimestamp");
 
         List<String[]> csvBody = reader.readAll();
 
-        csvBody.get(1)[1] = customers[0];
+        csvBody.get(1)[customerKey] = customers[0];
+        csvBody.get(1)[status] = args[5];
 
         ZonedDateTime utcTime = ZonedDateTime.now(ZoneOffset.UTC);
-        LocalDate date;
-        if(utcTime.toLocalDateTime().toLocalTime().getHour() >= 7) {
-            date = getDate(args[5]);
-        } else {
-            date = getDate(args[5]+1);
-        }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd 07:00:00");
-
-        csvBody.get(1)[4] = formatter.format(date);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss");
+        csvBody.get(1)[actionTimestamp] = csvBody.get(1)[deploymentDate] = formatter.format(utcTime);
 
         reader.close();
 
-        File outputFileDesktop = new File(DESKTOP_PATH + EMAIL_SENT_FILE);
+        File outputFileDesktop = new File(DESKTOP_PATH + EMAIL_ACTIVITY_FILE);
 
         CSVWriter writer = new CSVWriter(new FileWriter(outputFileDesktop));
         writer.writeAll(csvBody);
         writer.flush();
         writer.close();
         System.out.println("Generated file: " + outputFileDesktop.getAbsolutePath());
+
+        //ProcessUtils.encryptFile(outputFileDesktop);
     }
 
     private static LocalDate getDate(String days) {

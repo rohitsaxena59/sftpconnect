@@ -1,1 +1,1 @@
-Main-Class: com.example.helloworld.HelloWorld
+Main-Class: com.example.helloworld.FileGenerator

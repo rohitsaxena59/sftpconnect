@@ -7,8 +7,8 @@ import com.opencsv.exceptions.CsvException;
 
 import java.io.IOException;
 
-public class HelloWorld {
-    public static void main(String[] args) throws JSchException, SftpException, IOException, CsvException {
+public class FileGenerator {
+    public static String[] generate(String[] args) throws JSchException, SftpException, IOException, CsvException {
 
         // args - ActivationDate, ProductType, CureEmailInd ,DoNotEmail, name, sentDate,
         // active/inactive policy, email id flag
@@ -30,7 +30,9 @@ public class HelloWorld {
         System.out.println("Customers generated: " + customers[0] + "," + customers[1]);
         System.out.println("Policy generated for above customer: " + policies[0]);
 
-        //sftp.uploadFiles();
+        sftp.uploadFiles();
         sftp.disconnectSession();
+
+        return new String[] {customers[0], policies[0]};
     }
 }

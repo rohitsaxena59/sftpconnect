@@ -29,7 +29,7 @@ public class FileGenerator {
 
         System.out.println("Customers generated: " + customers[0] + "," + customers[1]);
         System.out.println("Policy generated for above customer: " + policies[0]);
-
+    
         sftp.uploadFiles();
         sftp.disconnectSession();
 

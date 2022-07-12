@@ -3,6 +3,7 @@ package com.example.sftp;
 import com.jcraft.jsch.*;
 
 import java.io.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.example.constants.SFTPConnectConstants.*;
@@ -88,12 +89,14 @@ public class SFTPConnect {
         return new Long[] {Long.parseLong(customerId), Long.parseLong(policyId)};
     }
 
-    public boolean ifFileExists(String path) throws JSchException, SftpException {
+    public boolean ifFilesExist(List<String> paths) throws JSchException, SftpException {
         ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
         channel.connect();
 
         try {
-            channel.lstat(path);
+            for(String path : paths) {
+                channel.lstat(path);
+            }
         } catch (SftpException e) {
             if(e.id == ChannelSftp.SSH_FX_NO_SUCH_FILE){
                 return false;
@@ -104,13 +107,6 @@ public class SFTPConnect {
             channel.disconnect();
         }
         return true;
-    }
-
-    public void getPGPPublicKey() throws JSchException, SftpException, FileNotFoundException {
-        ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
-        channel.connect();
-        channel.get("/pegafiletransfer/QA/pgp_public_key.pkr", DESKTOP_PATH+"pgp_public_key.pkr");
-        channel.disconnect();
     }
 
     public void disconnectSession() {

@@ -38,7 +38,7 @@ public class SFTPConnect {
 
         System.out.println("Uploading policy file...");
         channel.put(DESKTOP_PATH + POLICY_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
-        channel.put(DESKTOP_PATH +POLICY_CTL_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
+        channel.put(DESKTOP_PATH + POLICY_CTL_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
 
         System.out.println("Uploading customer id file...");
         channel.put(DESKTOP_PATH+"customer.txt", "/pegafiletransfer/QA/generated/customer.txt");

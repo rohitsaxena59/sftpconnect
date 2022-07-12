@@ -158,7 +158,7 @@ public class CSVUtils {
         csvBody.get(1)[status] = args[1];
         csvBody.get(1)[interactionId] = args[2];
 
-        ZonedDateTime utcTime = ZonedDateTime.now(ZoneOffset.UTC);
+        ZonedDateTime utcTime = ZonedDateTime.now(Clock.systemUTC());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss");
         csvBody.get(1)[actionTimestamp] = csvBody.get(1)[deploymentDate] = formatter.format(utcTime);
 

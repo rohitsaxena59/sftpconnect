@@ -9,7 +9,7 @@ import com.opencsv.exceptions.CsvException;
 import java.io.IOException;
 
 public class EmailFileGenerator {
-    public static void main(String[] args) throws JSchException, SftpException, IOException, CsvException {
+    public static void generate(String[] args) throws JSchException, SftpException, IOException, CsvException {
         System.out.println("Starting email file generator");
 
         // args - customerId, status, interactionid

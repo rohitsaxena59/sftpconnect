@@ -1,6 +1,7 @@
 package com.example.csv;
 
 import com.example.process.ProcessUtils;
+import com.example.sftp.SFTPConnect;
 import com.opencsv.*;
 import com.opencsv.exceptions.CsvException;
 import org.apache.commons.lang3.StringUtils;
@@ -12,17 +13,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 
-public class CSVUtils {
-    public static String CUST_FILE_NAME = "CNOF_EPS_CDH_CONTACT_pipe_test.csv";
-    public static String POLICY_FILE_NAME = "CNOF_EPS_CDH_POLICY_pipe_test.csv";
-    public static String EMAIL_ACTIVITY_FILE = "Email_Activity_1.csv";
-    public static String DESKTOP_PATH = System.getProperty("user.home") + "/Desktop/";
+import static com.example.constants.SFTPConnectConstants.*;
 
-    public static String CUST_FILE_VARS = "CNOF_EPS_CDH_CONTACT_NAME_";
-    public static String POLICY_FILE_VARS = "CNOF_EPS_CDH_POLICY_NAME_";
+public class CSVUtils {
+
     public static String[] addCustomers(String[] args, Long[] params) throws IOException, CsvException {
 
-        CUST_FILE_NAME = CUST_FILE_NAME.replace("NAME",args[4]);
+        //CUST_FILE_NAME = CUST_FILE_NAME.replace("NAME",args[4]);
         CUST_FILE_VARS = CUST_FILE_VARS.replace("NAME",args[4]);
 
         //Read from resources folder
@@ -84,7 +81,7 @@ public class CSVUtils {
 
     public static String[] addPolicy(String[] customers, String[] args, Long[] params) throws IOException, CsvException {
 
-        POLICY_FILE_NAME = POLICY_FILE_NAME.replace("NAME",args[4]);
+        //POLICY_FILE_NAME = POLICY_FILE_NAME.replace("NAME",args[4]);
         POLICY_FILE_VARS = POLICY_FILE_VARS.replace("NAME",args[4]);
 
         InputStream inputStream = CSVUtils.class.getClassLoader().getResourceAsStream(POLICY_FILE_NAME);
@@ -144,7 +141,7 @@ public class CSVUtils {
         return new String[] {csvBody.get(1)[1]};
     }
 
-    public static void addEmailSent(String[] customers, String[] args) throws IOException, CsvException {
+    public static void addEmailSent(String[] args) throws IOException, CsvException {
         InputStream inputStream = CSVUtils.class.getClassLoader().getResourceAsStream(EMAIL_ACTIVITY_FILE);
         CSVReader reader = new CSVReader(new InputStreamReader(inputStream));
 
@@ -153,11 +150,13 @@ public class CSVUtils {
         int customerKey =  Arrays.asList(headers).indexOf("CustomerKey");
         int status =  Arrays.asList(headers).indexOf("Action");
         int actionTimestamp =  Arrays.asList(headers).indexOf("OriginalActionTimestamp");
+        int interactionId =  Arrays.asList(headers).indexOf("ClientRequestID");
 
         List<String[]> csvBody = reader.readAll();
 
-        csvBody.get(1)[customerKey] = customers[0];
-        csvBody.get(1)[status] = args[5];
+        csvBody.get(1)[customerKey] = args[0];
+        csvBody.get(1)[status] = args[1];
+        csvBody.get(1)[interactionId] = args[2];
 
         ZonedDateTime utcTime = ZonedDateTime.now(ZoneOffset.UTC);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss");
@@ -167,13 +166,14 @@ public class CSVUtils {
 
         File outputFileDesktop = new File(DESKTOP_PATH + EMAIL_ACTIVITY_FILE);
 
-        CSVWriter writer = new CSVWriter(new FileWriter(outputFileDesktop));
+        CSVWriter writer = (CSVWriter) new CSVWriterBuilder(new FileWriter(outputFileDesktop)).
+                withQuoteChar(CSVParser.NULL_CHARACTER).build();
         writer.writeAll(csvBody);
         writer.flush();
         writer.close();
-        System.out.println("Generated file: " + outputFileDesktop.getAbsolutePath());
+        System.out.println("Generated activity file: " + outputFileDesktop.getAbsolutePath());
 
-        //ProcessUtils.encryptFile(outputFileDesktop);
+        ProcessUtils.encryptFile(outputFileDesktop);
     }
 
     private static LocalDate getDate(String days) {

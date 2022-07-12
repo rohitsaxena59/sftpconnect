@@ -5,14 +5,9 @@ import com.jcraft.jsch.*;
 import java.io.*;
 import java.util.stream.Collectors;
 
+import static com.example.constants.SFTPConnectConstants.*;
+
 public class SFTPConnect {
-
-    private static final String DESKTOP_PATH = System.getProperty("user.home") + "/Desktop/";
-    public static String CUST_FILE_NAME = "CNOF_EPS_CDH_CONTACT_pipe_test.csv";
-    public static String POLICY_FILE_NAME = "CNOF_EPS_CDH_POLICY_pipe_test.csv";
-
-    public static String CUST_CTL_FILE_NAME = "CNOF_EPS_CDH_CONTACT_pipe_test.ctl";
-    public static String POLICY_CTL_FILE_NAME = "CNOF_EPS_CDH_POLICY_pipe_test.ctl";
 
     private Session session;
 
@@ -43,7 +38,7 @@ public class SFTPConnect {
 
         System.out.println("Uploading policy file...");
         channel.put(DESKTOP_PATH + POLICY_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
-        channel.put(DESKTOP_PATH + POLICY_CTL_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
+        channel.put(DESKTOP_PATH +POLICY_CTL_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
 
         System.out.println("Uploading customer id file...");
         channel.put(DESKTOP_PATH+"customer.txt", "/pegafiletransfer/QA/generated/customer.txt");
@@ -52,6 +47,28 @@ public class SFTPConnect {
         channel.put(DESKTOP_PATH+"policy.txt", "/pegafiletransfer/QA/generated/policy.txt");
 
         channel.disconnect();
+    }
+
+    public void uploadEmailFiles() throws JSchException, SftpException {
+        ChannelSftp channelSftp = (ChannelSftp) session.openChannel("sftp");
+        try {
+            channelSftp.connect();
+
+            System.out.println("Uploading activity file...");
+            channelSftp.put(DESKTOP_PATH + EMAIL_ACTIVITY_FILE_GPG, SFTP_CONNECT_EMAIL_DIR, 0);
+
+            System.out.println("Uploading Optout file...");
+            channelSftp.put(DESKTOP_PATH + EMAIL_OPT_OUT_FILE_GPG, SFTP_CONNECT_EMAIL_DIR, 0);
+
+            System.out.println("Uploading FTD file...");
+            channelSftp.put(DESKTOP_PATH + EMAIL_FTD_FILE_GPG, SFTP_CONNECT_EMAIL_DIR, 0);
+
+            System.out.println("Uploading CTL file...");
+            channelSftp.put(DESKTOP_PATH + EMAIL_CTL_FILE, SFTP_CONNECT_EMAIL_DIR, 0);
+        }
+        finally {
+            channelSftp.disconnect();
+        }
     }
 
     public Long[] getParams() throws JSchException, SftpException, FileNotFoundException {
@@ -69,6 +86,31 @@ public class SFTPConnect {
 
         channel.disconnect();
         return new Long[] {Long.parseLong(customerId), Long.parseLong(policyId)};
+    }
+
+    public boolean ifFileExists(String path) throws JSchException, SftpException {
+        ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
+        channel.connect();
+
+        try {
+            channel.lstat(path);
+        } catch (SftpException e) {
+            if(e.id == ChannelSftp.SSH_FX_NO_SUCH_FILE){
+                return false;
+            } else {
+                throw e;
+            }
+        } finally {
+            channel.disconnect();
+        }
+        return true;
+    }
+
+    public void getPGPPublicKey() throws JSchException, SftpException, FileNotFoundException {
+        ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
+        channel.connect();
+        channel.get("/pegafiletransfer/QA/pgp_public_key.pkr", DESKTOP_PATH+"pgp_public_key.pkr");
+        channel.disconnect();
     }
 
     public void disconnectSession() {

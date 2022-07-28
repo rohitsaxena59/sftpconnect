@@ -43,8 +43,8 @@ public class CSVUtils {
         csvBody.get(1)[doNotEmailIndIdx] = args[3];
         csvBody.get(2)[doNotEmailIndIdx] = args[3];
 
-        csvBody.get(1)[emailAddressIdx] = "N".equalsIgnoreCase(args[7]) ? StringUtils.EMPTY : "raghugoud@futureproofai.com";
-        csvBody.get(2)[emailAddressIdx] = "N".equalsIgnoreCase(args[7]) ? StringUtils.EMPTY : "raghugoud@futureproofai.com";
+        csvBody.get(1)[emailAddressIdx] = "NA".equalsIgnoreCase(args[7]) ? StringUtils.EMPTY : args[7];
+        csvBody.get(2)[emailAddressIdx] = "NA".equalsIgnoreCase(args[7]) ? StringUtils.EMPTY : args[7];
 
         reader.close();
 
@@ -146,10 +146,9 @@ public class CSVUtils {
         CSVReader reader = new CSVReader(new InputStreamReader(inputStream));
 
         String[] headers = reader.peek();
-        int deploymentDate =  Arrays.asList(headers).indexOf("DeploymentDate_M");
         int customerKey =  Arrays.asList(headers).indexOf("CustomerKey");
         int status =  Arrays.asList(headers).indexOf("Action");
-        int actionTimestamp =  Arrays.asList(headers).indexOf("OriginalActionTimestamp");
+        int actionTimestamp =  Arrays.asList(headers).indexOf("ActionTimestamp");
         int interactionId =  Arrays.asList(headers).indexOf("ClientRequestID");
 
         List<String[]> csvBody = reader.readAll();
@@ -158,16 +157,15 @@ public class CSVUtils {
         csvBody.get(1)[status] = args[1];
         csvBody.get(1)[interactionId] = args[2];
 
-        ZonedDateTime utcTime = ZonedDateTime.now(Clock.systemUTC());
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss");
-        csvBody.get(1)[actionTimestamp] = csvBody.get(1)[deploymentDate] = formatter.format(utcTime);
+        ZonedDateTime utcTime = ZonedDateTime.now(ZoneId.of("America/Chicago")).minusDays(Long.parseLong(args[3]));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss");
+        csvBody.get(1)[actionTimestamp] = formatter.format(utcTime);
 
         reader.close();
 
         File outputFileDesktop = new File(DESKTOP_PATH + EMAIL_ACTIVITY_FILE);
 
-        CSVWriter writer = (CSVWriter) new CSVWriterBuilder(new FileWriter(outputFileDesktop)).
-                withQuoteChar(CSVParser.NULL_CHARACTER).build();
+        CSVWriter writer = (CSVWriter) new CSVWriterBuilder(new FileWriter(outputFileDesktop)).build();
         writer.writeAll(csvBody);
         writer.flush();
         writer.close();

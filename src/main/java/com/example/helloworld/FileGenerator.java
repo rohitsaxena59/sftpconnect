@@ -13,7 +13,7 @@ public class FileGenerator {
         System.out.println("Starting file generator");
 
         // args - ActivationDate, ProductType, CureEmailInd ,DoNotEmail, name, sentDate,
-        // active/inactive policy, email id flag
+        // active/inactive policy, email address
         if(args.length != 8) {
             throw new CsvException("Please enter all arguments");
         }

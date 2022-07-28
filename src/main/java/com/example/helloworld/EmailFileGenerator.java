@@ -13,7 +13,7 @@ public class EmailFileGenerator {
         System.out.println("Starting email file generator");
 
         // args - customerId, status, interactionid
-        if(args.length != 3) {
+        if(args.length != 4) {
             throw new CsvException("Please enter all arguments");
         }
         CSVUtils.addEmailSent(args);

@@ -4,6 +4,7 @@ import com.jcraft.jsch.*;
 
 import java.io.*;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import static com.example.constants.SFTPConnectConstants.*;
@@ -11,13 +12,27 @@ import static com.example.constants.SFTPConnectConstants.*;
 public class SFTPConnect {
 
     private Session session;
+    private Properties prop;
+    private String env;
+
+    public SFTPConnect(String env) {
+        try (InputStream input = SFTPConnect.class.getClassLoader().getResourceAsStream("env.properties")) {
+            Properties prop = new Properties();
+            prop.load(input);
+            this.prop = prop;
+            this.env = env;
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
 
     public void openSession() throws JSchException {
         JSch jsch = new JSch();
-        String privateKeyPath = DESKTOP_PATH + "FPAI_private_key.txt";
+        String privateKeyPath = CNO_PATH + prop.getProperty(env+".key");
         try {
             jsch.addIdentity(privateKeyPath);
-            session = jsch.getSession("sftp-user", "cnollc-cnocdh-stg1-sftp.pegacloud.net");
+            session = jsch.getSession(prop.getProperty(env+".user"), prop.getProperty(env+".host"));
             session.setConfig("PreferredAuthentications", "publickey,gssapi-keyex,gssapi-with-mic");
             java.util.Properties config = new java.util.Properties();
             config.put("StrictHostKeyChecking", "no");
@@ -34,18 +49,18 @@ public class SFTPConnect {
         channel.connect();
 
         System.out.println("Uploading customer file...");
-        channel.put(DESKTOP_PATH + CUST_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
-        channel.put(DESKTOP_PATH + CUST_CTL_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
+        channel.put(CNO_PATH + CUST_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
+        channel.put(CNO_PATH + CUST_CTL_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
 
         System.out.println("Uploading policy file...");
-        channel.put(DESKTOP_PATH + POLICY_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
-        channel.put(DESKTOP_PATH + POLICY_CTL_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
+        channel.put(CNO_PATH + POLICY_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
+        channel.put(CNO_PATH + POLICY_CTL_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
 
         System.out.println("Uploading customer id file...");
-        channel.put(DESKTOP_PATH+"customer.txt", "/pegafiletransfer/QA/generated/customer.txt");
+        channel.put(CNO_PATH +"customer.txt", "/pegafiletransfer/QA/generated/customer.txt");
 
         System.out.println("Uploading policy id file...");
-        channel.put(DESKTOP_PATH+"policy.txt", "/pegafiletransfer/QA/generated/policy.txt");
+        channel.put(CNO_PATH +"policy.txt", "/pegafiletransfer/QA/generated/policy.txt");
 
         channel.disconnect();
     }
@@ -56,16 +71,16 @@ public class SFTPConnect {
             channelSftp.connect();
 
             System.out.println("Uploading activity file...");
-            channelSftp.put(DESKTOP_PATH + EMAIL_ACTIVITY_FILE_GPG, SFTP_CONNECT_EMAIL_DIR, 0);
+            channelSftp.put(CNO_PATH + EMAIL_ACTIVITY_FILE_GPG, SFTP_CONNECT_EMAIL_DIR, 0);
 
             System.out.println("Uploading Optout file...");
-            channelSftp.put(DESKTOP_PATH + EMAIL_OPT_OUT_FILE_GPG, SFTP_CONNECT_EMAIL_DIR, 0);
+            channelSftp.put(CNO_PATH + EMAIL_OPT_OUT_FILE_GPG, SFTP_CONNECT_EMAIL_DIR, 0);
 
             System.out.println("Uploading FTD file...");
-            channelSftp.put(DESKTOP_PATH + EMAIL_FTD_FILE_GPG, SFTP_CONNECT_EMAIL_DIR, 0);
+            channelSftp.put(CNO_PATH + EMAIL_FTD_FILE_GPG, SFTP_CONNECT_EMAIL_DIR, 0);
 
             System.out.println("Uploading CTL file...");
-            channelSftp.put(DESKTOP_PATH + EMAIL_CTL_FILE, SFTP_CONNECT_EMAIL_DIR, 0);
+            channelSftp.put(CNO_PATH + EMAIL_CTL_FILE, SFTP_CONNECT_EMAIL_DIR, 0);
         }
         finally {
             channelSftp.disconnect();
@@ -77,12 +92,12 @@ public class SFTPConnect {
         ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
         channel.connect();
 
-        channel.get("/pegafiletransfer/QA/generated/customer.txt", DESKTOP_PATH+"customer.txt");
-        String customerId = new BufferedReader(new FileReader(DESKTOP_PATH+"customer.txt"))
+        channel.get("/pegafiletransfer/QA/generated/customer.txt", CNO_PATH +"customer.txt");
+        String customerId = new BufferedReader(new FileReader(CNO_PATH +"customer.txt"))
                 .lines().collect(Collectors.joining("\n"));
 
-        channel.get("/pegafiletransfer/QA/generated/policy.txt", DESKTOP_PATH+"policy.txt");
-        String policyId = new BufferedReader(new FileReader(DESKTOP_PATH+"policy.txt"))
+        channel.get("/pegafiletransfer/QA/generated/policy.txt", CNO_PATH +"policy.txt");
+        String policyId = new BufferedReader(new FileReader(CNO_PATH +"policy.txt"))
                 .lines().collect(Collectors.joining("\n"));
 
         channel.disconnect();

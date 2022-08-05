@@ -18,7 +18,7 @@ public class EmailFileGenerator {
         }
         CSVUtils.addEmailSent(args);
 
-        SFTPConnect sftp = new SFTPConnect();
+        SFTPConnect sftp = new SFTPConnect(args[9]);
         try {
             sftp.openSession();
             sftp.uploadEmailFiles();

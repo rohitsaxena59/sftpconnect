@@ -1,7 +1,6 @@
 package com.example.csv;
 
 import com.example.process.ProcessUtils;
-import com.example.sftp.SFTPConnect;
 import com.opencsv.*;
 import com.opencsv.exceptions.CsvException;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static com.example.constants.SFTPConnectConstants.*;
 
@@ -19,10 +19,8 @@ public class CSVUtils {
 
     public static String[] addCustomers(String[] args, Long[] params) throws IOException, CsvException {
 
-        //CUST_FILE_NAME = CUST_FILE_NAME.replace("NAME",args[4]);
         CUST_FILE_VARS = CUST_FILE_VARS.replace("NAME",args[4]);
 
-        //Read from resources folder
         InputStream inputStream = CSVUtils.class.getClassLoader().getResourceAsStream(CUST_FILE_NAME);
         CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
         CSVReader reader = new CSVReaderBuilder(new InputStreamReader(inputStream)).withCSVParser(parser).build();
@@ -48,13 +46,10 @@ public class CSVUtils {
 
         reader.close();
 
-        File outputFile = new File(CUST_FILE_NAME);
+        File outputFileDesktop = new File(CNO_PATH + CUST_FILE_NAME);
+        File outputFileVars = new File(getFilePath(args, CUST_FILE_VARS));
+        File customerTxtFile = new File(CNO_PATH + "customer.txt");
 
-        File outputFileDesktop = new File(DESKTOP_PATH + CUST_FILE_NAME);
-        File outputFileVars = new File(DESKTOP_PATH + CUST_FILE_VARS+args[0]+args[1]+args[2]+args[3]+".csv");
-        File customerTxtFile = new File(DESKTOP_PATH + "customer.txt");
-
-        //writeToFile(csvBody, outputFile);
         writeToFile(csvBody, outputFileDesktop);
         writeToFile(csvBody, outputFileVars);
         writeToFile(Long.toString(params[0]), customerTxtFile);
@@ -69,10 +64,8 @@ public class CSVUtils {
     }
 
     private static void writeToFile(List<String[]> csvBody, File file) throws IOException {
-        //CSVWriter writer = new CSVWriter(new FileWriter(file));
         CSVWriter writer = (CSVWriter) new CSVWriterBuilder(new FileWriter(file)).withSeparator('|')
                                 .withQuoteChar(CSVWriter.NO_QUOTE_CHARACTER).build();
-
         writer.writeAll(csvBody);
         writer.flush();
         writer.close();
@@ -81,7 +74,6 @@ public class CSVUtils {
 
     public static String[] addPolicy(String[] customers, String[] args, Long[] params) throws IOException, CsvException {
 
-        //POLICY_FILE_NAME = POLICY_FILE_NAME.replace("NAME",args[4]);
         POLICY_FILE_VARS = POLICY_FILE_VARS.replace("NAME",args[4]);
 
         InputStream inputStream = CSVUtils.class.getClassLoader().getResourceAsStream(POLICY_FILE_NAME);
@@ -96,49 +88,44 @@ public class CSVUtils {
 
         List<String[]> csvBody = reader.readAll();
 
-        csvBody.get(1)[0] = customers[0];
-        csvBody.get(2)[0] = customers[0];
-        csvBody.get(3)[0] = customers[0];
-        csvBody.get(4)[0] = customers[1];
+        IntStream.rangeClosed(1, 4).forEach(num -> {
+            csvBody.get(num)[0] =  num == 4 ? customers[1] : customers[0];
+        });
 
-        csvBody.get(1)[1] = Long.toString(++params[1]);
-        csvBody.get(2)[1] = Long.toString(params[1]);
-        csvBody.get(3)[1] = Long.toString(params[1]);
-        csvBody.get(4)[1] = Long.toString(params[1]);
+        IntStream.rangeClosed(1, 4).forEach(num -> {
+            csvBody.get(num)[1] = Long.toString(num == 1 ? ++params[1] : params[1]);
+        });
 
-        LocalDate date = getDate(args[0]);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd");
-        csvBody.get(1)[activationDateIdx] = formatter.format(date);
-        csvBody.get(2)[activationDateIdx] = formatter.format(date);
-        csvBody.get(3)[activationDateIdx] = formatter.format(date);
-        csvBody.get(4)[activationDateIdx] = formatter.format(date);
+        try {
+            LocalDate date = getDate(args[0]);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd");
+            updateRows(csvBody, activationDateIdx, formatter.format(date));
+        }
+        catch (NumberFormatException e) {
+            updateRows(csvBody, activationDateIdx, args[0]);
+        }
 
-        csvBody.get(1)[baseProdTypeIdx] = args[1];
-        csvBody.get(2)[baseProdTypeIdx] = args[1];
-        csvBody.get(3)[baseProdTypeIdx] = args[1];
-        csvBody.get(4)[baseProdTypeIdx] = args[1];
-
-        csvBody.get(1)[prodTypeIdx] = args[1];
-        csvBody.get(2)[prodTypeIdx] = args[1];
-        csvBody.get(3)[prodTypeIdx] = args[1];
-        csvBody.get(4)[prodTypeIdx] = args[1];
-
-        csvBody.get(1)[policyStatusIdx] = args[6];
-        csvBody.get(2)[policyStatusIdx] = args[6];
-        csvBody.get(3)[policyStatusIdx] = args[6];
-        csvBody.get(4)[policyStatusIdx] = args[6];
+        updateRows(csvBody, baseProdTypeIdx, args[1]);
+        updateRows(csvBody, prodTypeIdx, args[1]);
+        updateRows(csvBody, policyStatusIdx, args[6]);
 
         reader.close();
 
-        File outputFileDesktop = new File(DESKTOP_PATH + POLICY_FILE_NAME);
-        File outputFileVars = new File(DESKTOP_PATH + POLICY_FILE_VARS+args[0]+args[1]+args[2]+args[3]+".csv");
-        File policyTxtFile = new File(DESKTOP_PATH + "policy.txt");
+        File outputFileDesktop = new File(CNO_PATH + POLICY_FILE_NAME);
+        File outputFileVars = new File(getFilePath(args, POLICY_FILE_VARS));
+        File policyTxtFile = new File(CNO_PATH + "policy.txt");
 
         writeToFile(csvBody, outputFileDesktop);
         writeToFile(csvBody, outputFileVars);
         writeToFile(Long.toString(params[1]), policyTxtFile);
 
         return new String[] {csvBody.get(1)[1]};
+    }
+
+    private static void updateRows(List<String[]> csvBody, int col, String value) {
+        IntStream.rangeClosed(1, 4).forEach(num -> {
+            csvBody.get(num)[col] = value;
+        });
     }
 
     public static void addEmailSent(String[] args) throws IOException, CsvException {
@@ -163,15 +150,21 @@ public class CSVUtils {
 
         reader.close();
 
-        File outputFileDesktop = new File(DESKTOP_PATH + EMAIL_ACTIVITY_FILE);
+        File emailFileDesktop = new File(CNO_PATH + EMAIL_ACTIVITY_FILE);
+        File emailFileVars = new File(getFilePath(args, EMAIL_ACTIVITY_FILE));
 
-        CSVWriter writer = (CSVWriter) new CSVWriterBuilder(new FileWriter(outputFileDesktop)).build();
+        writeToEmailFile(csvBody, emailFileDesktop);
+        writeToEmailFile(csvBody, emailFileVars);
+
+        ProcessUtils.encryptFile(emailFileDesktop);
+    }
+
+    private static void writeToEmailFile(List<String[]> csvBody, File file) throws IOException {
+        CSVWriter writer = (CSVWriter) new CSVWriterBuilder(new FileWriter(file)).build();
         writer.writeAll(csvBody);
         writer.flush();
         writer.close();
-        System.out.println("Generated activity file: " + outputFileDesktop.getAbsolutePath());
-
-        ProcessUtils.encryptFile(outputFileDesktop);
+        System.out.println("Generated activity file: " + file.getAbsolutePath());
     }
 
     private static LocalDate getDate(String days) {
@@ -184,5 +177,15 @@ public class CSVUtils {
             date = LocalDate.now();
         }
         return date;
+    }
+
+    private static String getFilePath(String[] args, String prefix) {
+        String localDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd"));
+        File dir = new File(CNO_PATH + localDate);
+        if (!dir.exists()){
+            dir.mkdirs();
+        }
+        String localTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH_mm_ss"));
+        return CNO_PATH + localDate + "/" + prefix + args[0]+args[1]+args[2]+args[3] + "_" + localTime +".csv";
     }
 }

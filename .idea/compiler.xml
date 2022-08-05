@@ -10,7 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="SFTPConnect" target="17" />
+      <module name="SFTPConnect" target="13" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -1,7 +1,6 @@
 package com.example.helloworld;
 
 import com.example.csv.BulkCSVUtils;
-import com.example.csv.CSVUtils;
 import com.example.sftp.SFTPConnect;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
@@ -10,14 +9,15 @@ import com.opencsv.exceptions.CsvException;
 import java.io.IOException;
 import java.util.Arrays;
 
+
 public class BulkFileGenerator {
     public static String[] generate(String[] args) throws JSchException, SftpException, IOException, CsvException {
 
         System.out.println("Starting bulk file generator");
 
         // args - ActivationDate, ProductType, CureEmailInd ,DoNotEmail, name, sentDate,
-        // active/inactive policy, email address, number of customers, env
-        if(args.length != 10) {
+        // active/inactive policy, email address, number of customers, env, append
+        if(args.length != 11) {
             throw new CsvException("Please enter all arguments");
         }
 
@@ -32,7 +32,7 @@ public class BulkFileGenerator {
         System.out.println("Customers generated: " + Arrays.toString(customers));
         System.out.println("Policy generated for above customer: " + Arrays.toString(policies));
 
-        sftp.uploadFiles();
+        sftp.uploadQAFiles();
         sftp.disconnectSession();
 
         return new String[] {customers[0], policies[0]};

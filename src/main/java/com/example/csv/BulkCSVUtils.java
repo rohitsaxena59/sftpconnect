@@ -1,5 +1,6 @@
 package com.example.csv;
 
+import com.example.property.PropertyUtils;
 import com.opencsv.*;
 import com.opencsv.exceptions.CsvException;
 import org.apache.commons.lang3.StringUtils;
@@ -35,14 +36,17 @@ public class BulkCSVUtils {
 
         List<String[]> csvBody = reader.readAll();
 
-        CSVWriter writer = (CSVWriter) new CSVWriterBuilder(new FileWriter(CNO_PATH + CUST_FILE_NAME)).withSeparator('|')
-                .withQuoteChar(CSVWriter.NO_QUOTE_CHARACTER).build();
-        writer.writeNext(csvBody.get(0));
+        CSVWriter writer = (CSVWriter) new CSVWriterBuilder(new FileWriter(CNO_PATH + CUST_FILE_NAME,
+                Boolean.parseBoolean(args[10]))).withSeparator('|').withQuoteChar(CSVWriter.NO_QUOTE_CHARACTER).build();
+
+        if(!Boolean.parseBoolean(args[10])) {
+            writer.writeNext(csvBody.get(0));
+        }
 
         IntStream.rangeClosed(1, Integer.parseInt(args[8])).forEach(num -> {
 
-            csvBody.get(1)[0] = Long.toString(++params[0]);
-            csvBody.get(2)[0] = Long.toString(++params[0]);
+            csvBody.get(1)[0] = append(++params[0],args[9]);
+            csvBody.get(2)[0] = append(++params[0],args[9]);
 
             csvBody.get(1)[cureEmailIndIdx] = args[2];
             csvBody.get(2)[cureEmailIndIdx] = args[2];
@@ -86,14 +90,20 @@ public class BulkCSVUtils {
 
         List<String[]> csvBody = reader.readAll();
 
-        CSVWriter writer = (CSVWriter) new CSVWriterBuilder(new FileWriter(CNO_PATH + POLICY_FILE_NAME)).withSeparator('|')
+        CSVWriter writer = (CSVWriter) new CSVWriterBuilder(new FileWriter(CNO_PATH + POLICY_FILE_NAME,
+                Boolean.parseBoolean(args[10]))).withSeparator('|')
                 .withQuoteChar(CSVWriter.NO_QUOTE_CHARACTER).build();
-        writer.writeNext(csvBody.get(0));
+
+        if(!Boolean.parseBoolean(args[10])) {
+            writer.writeNext(csvBody.get(0));
+        }
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd");
 
         IntStream.rangeClosed(1, Integer.parseInt(args[8])).forEach(custNum -> {
             IntStream.rangeClosed(1, 4).forEach(num -> {
-                csvBody.get(num)[0] =  num == 4 ? Long.toString(Long.parseLong(customers[custNum-1])+1) : customers[custNum-1];
+
+                csvBody.get(num)[0] =  num == 4 ? append(extract(customers[custNum-1],args[9])+1, args[9]) : customers[custNum-1];
                 csvBody.get(num)[1] = Long.toString(num == 1 ? ++params[1] : params[1]);
                 csvBody.get(num)[baseProdTypeIdx] = args[1];
                 csvBody.get(num)[prodTypeIdx] = args[1];
@@ -112,6 +122,14 @@ public class BulkCSVUtils {
         writeToFile(Long.toString(params[1]), policyTxtFile);
 
         return policies.stream().toArray(String[]::new);
+    }
+
+    private static Long extract(String customer, String env) {
+        return Long.parseLong(customer.replace(PropertyUtils.properties.getProperty(env + ".customer.prefix"), StringUtils.EMPTY));
+    }
+
+    private static String append(Long customer, String env) {
+        return PropertyUtils.properties.getProperty(env + ".customer.prefix") + customer;
     }
 
     private static boolean isDateParseable(String days) {

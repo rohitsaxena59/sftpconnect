@@ -1,5 +1,6 @@
 package com.example.sftp;
 
+import com.example.property.PropertyUtils;
 import com.jcraft.jsch.*;
 
 import java.io.*;
@@ -12,27 +13,18 @@ import static com.example.constants.SFTPConnectConstants.*;
 public class SFTPConnect {
 
     private Session session;
-    private Properties prop;
     private String env;
 
-    public SFTPConnect(String env) {
-        try (InputStream input = SFTPConnect.class.getClassLoader().getResourceAsStream("env.properties")) {
-            Properties prop = new Properties();
-            prop.load(input);
-            this.prop = prop;
-            this.env = env;
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+    public SFTPConnect(String env) throws IOException {
+        this.env  = env;
     }
 
     public void openSession() throws JSchException {
         JSch jsch = new JSch();
-        String privateKeyPath = CNO_PATH + prop.getProperty(env+".key");
+        String privateKeyPath = CNO_PATH + getProperty("key");
         try {
             jsch.addIdentity(privateKeyPath);
-            session = jsch.getSession(prop.getProperty(env+".user"), prop.getProperty(env+".host"));
+            session = jsch.getSession(getProperty("user"), getProperty("host"));
             session.setConfig("PreferredAuthentications", "publickey,gssapi-keyex,gssapi-with-mic");
             java.util.Properties config = new java.util.Properties();
             config.put("StrictHostKeyChecking", "no");
@@ -49,18 +41,31 @@ public class SFTPConnect {
         channel.connect();
 
         System.out.println("Uploading customer file...");
-        channel.put(CNO_PATH + CUST_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
-        channel.put(CNO_PATH + CUST_CTL_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
+        channel.put(CNO_PATH + CUST_FILE_NAME, getProperty("sftp.root")+"/Wellspring/",0 );
+        channel.put(CNO_PATH + CUST_CTL_FILE_NAME, getProperty("sftp.root")+"/Wellspring/",0 );
 
         System.out.println("Uploading policy file...");
-        channel.put(CNO_PATH + POLICY_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
-        channel.put(CNO_PATH + POLICY_CTL_FILE_NAME, "/pegafiletransfer/Wellspring/",0 );
+        channel.put(CNO_PATH + POLICY_FILE_NAME, getProperty("sftp.root")+"/Wellspring/",0 );
+        channel.put(CNO_PATH + POLICY_CTL_FILE_NAME, getProperty("sftp.root")+"/Wellspring/",0 );
+
+//        System.out.println("Uploading customer id file...");
+//        channel.put(CNO_PATH +"customer.txt", getProperty("sftp.root") +"/QA/generated/customer.txt");
+//
+//        System.out.println("Uploading policy id file...");
+//        channel.put(CNO_PATH +"policy.txt", getProperty("sftp.root") +"/QA/generated/policy.txt");
+
+        channel.disconnect();
+    }
+
+    public void uploadQAFiles() throws JSchException, SftpException {
+        ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
+        channel.connect();
 
         System.out.println("Uploading customer id file...");
-        channel.put(CNO_PATH +"customer.txt", "/pegafiletransfer/QA/generated/customer.txt");
+        channel.put(CNO_PATH +"customer.txt", getProperty("sftp.root") +"/QA/generated/customer.txt");
 
         System.out.println("Uploading policy id file...");
-        channel.put(CNO_PATH +"policy.txt", "/pegafiletransfer/QA/generated/policy.txt");
+        channel.put(CNO_PATH +"policy.txt", getProperty("sftp.root") +"/QA/generated/policy.txt");
 
         channel.disconnect();
     }
@@ -71,16 +76,16 @@ public class SFTPConnect {
             channelSftp.connect();
 
             System.out.println("Uploading activity file...");
-            channelSftp.put(CNO_PATH + EMAIL_ACTIVITY_FILE_GPG, SFTP_CONNECT_EMAIL_DIR, 0);
+            channelSftp.put(CNO_PATH + EMAIL_ACTIVITY_FILE_GPG, getProperty("sftp.root")  + SFTP_CONNECT_EMAIL_DIR, 0);
 
             System.out.println("Uploading Optout file...");
-            channelSftp.put(CNO_PATH + EMAIL_OPT_OUT_FILE_GPG, SFTP_CONNECT_EMAIL_DIR, 0);
+            channelSftp.put(CNO_PATH + EMAIL_OPT_OUT_FILE_GPG, getProperty("sftp.root")  + SFTP_CONNECT_EMAIL_DIR, 0);
 
             System.out.println("Uploading FTD file...");
-            channelSftp.put(CNO_PATH + EMAIL_FTD_FILE_GPG, SFTP_CONNECT_EMAIL_DIR, 0);
+            channelSftp.put(CNO_PATH + EMAIL_FTD_FILE_GPG, getProperty("sftp.root")  + SFTP_CONNECT_EMAIL_DIR, 0);
 
             System.out.println("Uploading CTL file...");
-            channelSftp.put(CNO_PATH + EMAIL_CTL_FILE, SFTP_CONNECT_EMAIL_DIR, 0);
+            channelSftp.put(CNO_PATH + EMAIL_CTL_FILE, getProperty("sftp.root")  + SFTP_CONNECT_EMAIL_DIR, 0);
         }
         finally {
             channelSftp.disconnect();
@@ -92,16 +97,20 @@ public class SFTPConnect {
         ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
         channel.connect();
 
-        channel.get("/pegafiletransfer/QA/generated/customer.txt", CNO_PATH +"customer.txt");
+        channel.get(getProperty("sftp.root") + "/QA/generated/customer.txt", CNO_PATH +"customer.txt");
         String customerId = new BufferedReader(new FileReader(CNO_PATH +"customer.txt"))
                 .lines().collect(Collectors.joining("\n"));
 
-        channel.get("/pegafiletransfer/QA/generated/policy.txt", CNO_PATH +"policy.txt");
+        channel.get(getProperty("sftp.root") + "/QA/generated/policy.txt", CNO_PATH +"policy.txt");
         String policyId = new BufferedReader(new FileReader(CNO_PATH +"policy.txt"))
                 .lines().collect(Collectors.joining("\n"));
 
         channel.disconnect();
         return new Long[] {Long.parseLong(customerId), Long.parseLong(policyId)};
+    }
+
+    private String getProperty(String key) {
+        return PropertyUtils.properties.getProperty(env + "." + key);
     }
 
     public boolean ifFilesExist(List<String> paths) throws JSchException, SftpException {

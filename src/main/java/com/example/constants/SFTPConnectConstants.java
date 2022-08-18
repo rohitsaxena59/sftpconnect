@@ -15,8 +15,8 @@ public class SFTPConnectConstants {
     public static final String EMAIL_ACTIVITY_FILE_GPG = "ColonialPenn_Activity__New.pgp";
     public static final String EMAIL_OPT_OUT_FILE_GPG = "ColonialPenn_OptOut_New.pgp";
     public static final String EMAIL_FTD_FILE_GPG = "ColonialPenn_FTD_New.pgp";
-    public static final String EMAIL_CTL_FILE = "ColonialPenn_Extracts_New.ctl.pgp";
+    public static final String EMAIL_CTL_FILE = "ColonialPenn_Extracts_xxxxxxxx.pgp";
 
-    public static final String SFTP_CONNECT_EMAIL_DIR = "/pegafiletransfer/Email/";
+    public static final String SFTP_CONNECT_EMAIL_DIR = "/Email/";
     public static final String SFTP_CONNECT_WELLSPRING_DIR = "/pegafiletransfer/Wellspring/";
 }

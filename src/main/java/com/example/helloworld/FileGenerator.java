@@ -30,6 +30,7 @@ public class FileGenerator {
         System.out.println("Policy generated for above customer: " + policies[0]);
 
         sftp.uploadFiles();
+        sftp.uploadQAFiles();
         sftp.disconnectSession();
 
         return new String[] {customers[0], policies[0]};

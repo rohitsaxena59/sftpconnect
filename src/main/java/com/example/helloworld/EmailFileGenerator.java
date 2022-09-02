@@ -12,13 +12,13 @@ public class EmailFileGenerator {
     public static void generate(String[] args) throws JSchException, SftpException, IOException, CsvException {
         System.out.println("Starting email file generator");
 
-        // args - customerId, status, interactionid
-        if(args.length != 4) {
+        // args - customerId, status, interactionid, days, env
+        if(args.length != 5) {
             throw new CsvException("Please enter all arguments");
         }
         CSVUtils.addEmailSent(args);
 
-        SFTPConnect sftp = new SFTPConnect(args[9]);
+        SFTPConnect sftp = new SFTPConnect(args[4]);
         try {
             sftp.openSession();
             sftp.uploadEmailFiles();

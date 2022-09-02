@@ -48,12 +48,6 @@ public class SFTPConnect {
         channel.put(CNO_PATH + POLICY_FILE_NAME, getProperty("sftp.root")+"/Wellspring/",0 );
         channel.put(CNO_PATH + POLICY_CTL_FILE_NAME, getProperty("sftp.root")+"/Wellspring/",0 );
 
-//        System.out.println("Uploading customer id file...");
-//        channel.put(CNO_PATH +"customer.txt", getProperty("sftp.root") +"/QA/generated/customer.txt");
-//
-//        System.out.println("Uploading policy id file...");
-//        channel.put(CNO_PATH +"policy.txt", getProperty("sftp.root") +"/QA/generated/policy.txt");
-
         channel.disconnect();
     }
 
